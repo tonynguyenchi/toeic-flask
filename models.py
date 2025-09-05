@@ -119,13 +119,13 @@ def init_sample_questions():
             question = Question()
             question.part = 1
             question.question_number = i
-            question.question_text = f"Look at the picture. Choose the statement that best describes what you see."
-            question.option_a = "(A) Audio option A"
-            question.option_b = "(B) Audio option B"
-            question.option_c = "(C) Audio option C"
-            question.option_d = "(D) Audio option D"
+            question.question_text = f"Look at the picture marked number {i}."
+            question.option_a = "(A) The woman is sitting at her desk"
+            question.option_b = "(B) The man is walking down the hallway"
+            question.option_c = "(C) People are having a meeting"
+            question.option_d = "(D) The office is empty"
             question.correct_answer = "A"
-            question.audio_file = "sample.mp3"
+            question.audio_file = "part1_sample.mp3"
             sample_questions.append(question)
         
         # Part II - Question-Response (25 questions)
@@ -133,13 +133,13 @@ def init_sample_questions():
             question = Question()
             question.part = 2
             question.question_number = i
-            question.question_text = "You will hear a question or statement and three responses. Choose the best response."
-            question.option_a = "(A) Audio response A"
-            question.option_b = "(B) Audio response B"
-            question.option_c = "(C) Audio response C"
+            question.question_text = "Mark your answer on your answer sheet."
+            question.option_a = "(A) Yes, at 2 o'clock"
+            question.option_b = "(B) In the conference room"
+            question.option_c = "(C) Mr. Johnson will attend"
             question.option_d = ""
             question.correct_answer = "B"
-            question.audio_file = "sample.mp3"
+            question.audio_file = "part2_sample.mp3"
             sample_questions.append(question)
         
         # Part III - Conversations (39 questions)
@@ -147,13 +147,13 @@ def init_sample_questions():
             question = Question()
             question.part = 3
             question.question_number = i
-            question.question_text = f"What is the main topic of the conversation?"
-            question.option_a = "(A) A business meeting"
-            question.option_b = "(B) A job interview"
-            question.option_c = "(C) A phone call"
-            question.option_d = "(D) A presentation"
-            question.correct_answer = "C"
-            question.audio_file = "sample.mp3"
+            question.question_text = f"What does the man want to do?"
+            question.option_a = "(A) Schedule an appointment"
+            question.option_b = "(B) Cancel a meeting"
+            question.option_c = "(C) Change his reservation"
+            question.option_d = "(D) Ask for directions"
+            question.correct_answer = "A"
+            question.audio_file = "part3_sample.mp3"
             sample_questions.append(question)
         
         # Part IV - Talks (30 questions) 
@@ -161,13 +161,13 @@ def init_sample_questions():
             question = Question()
             question.part = 4
             question.question_number = i
-            question.question_text = "What is the speaker mainly talking about?"
-            question.option_a = "(A) Company policies"
-            question.option_b = "(B) Product features"
-            question.option_c = "(C) Meeting agenda"
-            question.option_d = "(D) Travel arrangements"
-            question.correct_answer = "B"
-            question.audio_file = "sample.mp3"
+            question.question_text = "What is the main purpose of this announcement?"
+            question.option_a = "(A) To introduce new company policies"
+            question.option_b = "(B) To present quarterly results"
+            question.option_c = "(C) To announce a new product line"
+            question.option_d = "(D) To schedule a meeting"
+            question.correct_answer = "C"
+            question.audio_file = "part4_sample.mp3"
             sample_questions.append(question)
         
         # Part V - Incomplete Sentences (30 questions)

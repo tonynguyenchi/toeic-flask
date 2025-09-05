@@ -122,7 +122,9 @@ class TOEICAudio {
                 this.currentAudio = audioElement;
             }).catch(error => {
                 console.error('Error playing sample audio:', error);
-                this.showAudioError('sample');
+                playBtn.innerHTML = '<i class="fas fa-volume-mute me-2"></i>Audio Not Available';
+                playBtn.disabled = true;
+                playBtn.classList.add('btn-secondary');
             });
         } else {
             audioElement.pause();

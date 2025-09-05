@@ -1,0 +1,51 @@
+TOEIC Audio Setup Instructions
+=================================
+
+Current Status:
+- The application is set up with placeholder audio files
+- Audio controls are fully functional
+- You can easily replace placeholder files with real TOEIC audio
+
+How to Add Real TOEIC Audio:
+-----------------------------
+
+1. LEGAL SOURCES for TOEIC Audio:
+   - Official ETS TOEIC practice materials
+   - Licensed TOEIC preparation books with audio CDs
+   - Educational institutions with proper licensing
+   - Your own recorded content following TOEIC format
+
+2. FILE PLACEMENT:
+   Place your audio files in the static/audio/ directory:
+   - part1_sample.mp3 (for Part I - Photographs)
+   - part2_sample.mp3 (for Part II - Question-Response)
+   - part3_sample.mp3 (for Part III - Conversations)
+   - part4_sample.mp3 (for Part IV - Talks)
+
+3. SUPPORTED FORMATS:
+   - MP3 (recommended)
+   - WAV
+   - OGG
+
+4. AUDIO REQUIREMENTS:
+   - Clear speech quality
+   - Appropriate volume levels
+   - Standard TOEIC pace and pronunciation
+   - Duration: 30 seconds to 2 minutes per section
+
+5. ADDING MORE QUESTIONS:
+   - Edit models.py to add more questions
+   - Update the audio_file field to match your audio files
+   - Restart the application to load new content
+
+6. COPYRIGHT NOTICE:
+   - Only use audio content you have legal rights to use
+   - Do not use copyrighted TOEIC materials without proper licensing
+   - Consider creating your own practice content or using open-source alternatives
+
+Current Demo Content:
+- Sample questions with realistic TOEIC-style text
+- Placeholder audio files for testing interface
+- Fully functional audio controls and timing features
+
+For a production deployment, replace placeholder content with legitimate TOEIC practice materials.
