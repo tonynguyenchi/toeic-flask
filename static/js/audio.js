@@ -87,7 +87,8 @@ class TOEICAudio {
         });
 
         audioElement.addEventListener('error', (e) => {
-            this.onAudioError(questionNumber, e);
+            console.warn(`Audio not available for question ${questionNumber}`);
+            this.disableAudioButton(questionNumber);
         });
     }
 
@@ -285,6 +286,16 @@ class TOEICAudio {
         if (playBtn) {
             playBtn.innerHTML = '<i class="fas fa-play me-2"></i>Play Audio';
             playBtn.disabled = false;
+        }
+    }
+
+    disableAudioButton(questionNumber) {
+        const playBtn = document.querySelector(`.audio-play-btn[data-question="${questionNumber}"]`);
+        if (playBtn) {
+            playBtn.innerHTML = '<i class="fas fa-volume-mute me-2"></i>Audio Not Available';
+            playBtn.disabled = true;
+            playBtn.classList.add('btn-secondary');
+            playBtn.classList.remove('btn-primary');
         }
     }
 

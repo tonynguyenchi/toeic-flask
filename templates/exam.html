@@ -11,7 +11,7 @@
                 <div class="col-md-4">
                     <div class="timer-display">
                         <i class="fas fa-clock me-2"></i>
-                        <span id="timer">{{ (time_remaining // 3600)|string|zfill(2) }}:{{ ((time_remaining % 3600) // 60)|string|zfill(2) }}:{{ (time_remaining % 60)|string|zfill(2) }}</span>
+                        <span id="timer">{{ "%02d:%02d:%02d"|format(time_remaining // 3600, (time_remaining % 3600) // 60, time_remaining % 60) }}</span>
                     </div>
                 </div>
                 <div class="col-md-4 text-center">
