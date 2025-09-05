@@ -167,6 +167,7 @@ class TOEICExam {
             }
         } catch (error) {
             console.error('Error saving answer:', error);
+            this.showSaveError();
         }
     }
 
@@ -241,6 +242,23 @@ class TOEICExam {
         setTimeout(() => {
             indicator.classList.remove('show');
         }, 2000);
+    }
+
+    showSaveError() {
+        let indicator = document.getElementById('saveErrorIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'saveErrorIndicator';
+            indicator.className = 'save-indicator';
+            indicator.style.background = 'var(--bs-danger)';
+            indicator.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>Save Failed';
+            document.body.appendChild(indicator);
+        }
+
+        indicator.classList.add('show');
+        setTimeout(() => {
+            indicator.classList.remove('show');
+        }, 3000);
     }
 
     async loadSavedAnswers() {

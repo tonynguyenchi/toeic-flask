@@ -87,20 +87,54 @@
                                 
                                 <!-- Answer Options -->
                                 <div class="answer-options">
-                                    {% for option in ['A', 'B', 'C', 'D'] %}
-                                    {% if question['option_' + option.lower()] %}
+                                    {% if question.option_a %}
                                     <div class="form-check answer-option">
                                         <input class="form-check-input" type="radio" 
                                                name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_{{ option }}"
-                                               value="{{ option }}"
+                                               id="q{{ question.question_number }}_A"
+                                               value="A"
                                                data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_{{ option }}">
-                                            ({{ option }}) <span class="audio-option">Listen to audio</span>
+                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
+                                            {{ question.option_a }}
                                         </label>
                                     </div>
                                     {% endif %}
-                                    {% endfor %}
+                                    {% if question.option_b %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_B"
+                                               value="B"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
+                                            {{ question.option_b }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_c %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_C"
+                                               value="C"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
+                                            {{ question.option_c }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_d %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_D"
+                                               value="D"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
+                                            {{ question.option_d }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}
@@ -143,18 +177,230 @@
                                 </div>
                                 
                                 <div class="answer-options">
-                                    {% for option in ['A', 'B', 'C'] %}
+                                    {% if question.option_a %}
                                     <div class="form-check answer-option">
                                         <input class="form-check-input" type="radio" 
                                                name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_{{ option }}"
-                                               value="{{ option }}"
+                                               id="q{{ question.question_number }}_A"
+                                               value="A"
                                                data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_{{ option }}">
-                                            ({{ option }}) <span class="audio-option">Listen to audio</span>
+                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
+                                            {{ question.option_a }}
                                         </label>
                                     </div>
-                                    {% endfor %}
+                                    {% endif %}
+                                    {% if question.option_b %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_B"
+                                               value="B"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
+                                            {{ question.option_b }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_c %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_C"
+                                               value="C"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
+                                            {{ question.option_c }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Part III Content -->
+                    <div class="part-content" id="part-3" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part III: Conversations</h4>
+                            <p class="text-muted">
+                                Directions: You will hear some conversations between two or more people. 
+                                You will be asked to answer three questions about what the speakers say in each conversation. 
+                                Select the best response to each question.
+                            </p>
+                        </div>
+                        
+                        {% for question in questions %}
+                            {% if question.part == 3 %}
+                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
+                                <div class="question-header">
+                                    <h6>Question {{ question.question_number }}</h6>
+                                </div>
+                                
+                                <div class="audio-section mb-3">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                            <p class="mb-2">Listen to the conversation and answer the questions.</p>
+                                            <div class="audio-controls">
+                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
+                                                    <i class="fas fa-play me-2"></i>Play Audio
+                                                </button>
+                                            </div>
+                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
+                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
+                                            </audio>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-text mb-3">
+                                    <p><strong>{{ question.question_text }}</strong></p>
+                                </div>
+                                
+                                <div class="answer-options">
+                                    {% if question.option_a %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_A"
+                                               value="A"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
+                                            {{ question.option_a }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_b %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_B"
+                                               value="B"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
+                                            {{ question.option_b }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_c %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_C"
+                                               value="C"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
+                                            {{ question.option_c }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_d %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_D"
+                                               value="D"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
+                                            {{ question.option_d }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Part IV Content -->
+                    <div class="part-content" id="part-4" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part IV: Talks</h4>
+                            <p class="text-muted">
+                                Directions: You will hear some talks given by a single speaker. 
+                                You will be asked to answer three questions about what the speaker says in each talk. 
+                                Select the best response to each question.
+                            </p>
+                        </div>
+                        
+                        {% for question in questions %}
+                            {% if question.part == 4 %}
+                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
+                                <div class="question-header">
+                                    <h6>Question {{ question.question_number }}</h6>
+                                </div>
+                                
+                                <div class="audio-section mb-3">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-microphone fa-3x text-muted mb-3"></i>
+                                            <p class="mb-2">Listen to the talk and answer the questions.</p>
+                                            <div class="audio-controls">
+                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
+                                                    <i class="fas fa-play me-2"></i>Play Audio
+                                                </button>
+                                            </div>
+                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
+                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
+                                            </audio>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="question-text mb-3">
+                                    <p><strong>{{ question.question_text }}</strong></p>
+                                </div>
+                                
+                                <div class="answer-options">
+                                    {% if question.option_a %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_A"
+                                               value="A"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
+                                            {{ question.option_a }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_b %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_B"
+                                               value="B"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
+                                            {{ question.option_b }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_c %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_C"
+                                               value="C"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
+                                            {{ question.option_c }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_d %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_D"
+                                               value="D"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
+                                            {{ question.option_d }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}
@@ -200,20 +446,54 @@
                                 </div>
                                 
                                 <div class="answer-options">
-                                    {% for option in ['A', 'B', 'C', 'D'] %}
-                                    {% if question['option_' + option.lower()] %}
+                                    {% if question.option_a %}
                                     <div class="form-check answer-option">
                                         <input class="form-check-input" type="radio" 
                                                name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_{{ option }}"
-                                               value="{{ option }}"
+                                               id="q{{ question.question_number }}_A"
+                                               value="A"
                                                data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_{{ option }}">
-                                            {{ question['option_' + option.lower()] }}
+                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
+                                            {{ question.option_a }}
                                         </label>
                                     </div>
                                     {% endif %}
-                                    {% endfor %}
+                                    {% if question.option_b %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_B"
+                                               value="B"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
+                                            {{ question.option_b }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_c %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_C"
+                                               value="C"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
+                                            {{ question.option_c }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% if question.option_d %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_D"
+                                               value="D"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
+                                            {{ question.option_d }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}
