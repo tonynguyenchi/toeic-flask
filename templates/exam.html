@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}TOEIC Exam - Part I{% endblock %}
+
+{% block content %}
+<div class="exam-container">
+    <!-- Exam Header -->
+    <div class="exam-header bg-dark text-white py-2 sticky-top">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="timer-display">
+                        <i class="fas fa-clock me-2"></i>
+                        <span id="timer">{{ (time_remaining // 3600)|string|zfill(2) }}:{{ ((time_remaining % 3600) // 60)|string|zfill(2) }}:{{ (time_remaining % 60)|string|zfill(2) }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h5 class="mb-0">TOEIC Practice Test</h5>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="progress-display">
+                        <span id="progressText">0/200 (0%)</span>
+                        <div class="progress ms-2" style="width: 100px; height: 8px;">
+                            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Main Content Area -->
+            <div class="col-lg-9">
+                <!-- Part Tabs -->
+                <div class="part-tabs bg-light p-2 mb-3">
+                    <nav class="nav nav-pills">
+                        {% for part in range(1, 8) %}
+                        <button class="nav-link part-tab {{ 'active' if part == 1 else '' }}" 
+                                data-part="{{ part }}" id="tab-part-{{ part }}">
+                            Part {{ ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][part-1] }}
+                        </button>
+                        {% endfor %}
+                    </nav>
+                </div>
+
+                <!-- Question Content -->
+                <div id="questionContent" class="question-content">
+                    <!-- Part I Content -->
+                    <div class="part-content" id="part-1" style="display: block;">
+                        <div class="part-header mb-4">
+                            <h4>Part I: Photographs</h4>
+                            <p class="text-muted">
+                                Directions: For each question in this part, you will hear four statements about a picture in your test book. 
+                                When you hear the statements, you must select the one statement that best describes what you see in the picture.
+                            </p>
+                        </div>
+                        
+                        {% for question in questions %}
+                            {% if question.part == 1 %}
+                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
+                                <div class="question-header">
+                                    <h6>Question {{ question.question_number }}</h6>
+                                </div>
+                                
+                                <!-- Audio Controls for Listening Parts -->
+                                <div class="audio-section mb-3">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                                            <p class="mb-2">Look at the picture and listen to the four statements.</p>
+                                            <div class="audio-controls">
+                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
+                                                    <i class="fas fa-play me-2"></i>Play Audio
+                                                </button>
+                                                <button class="btn btn-secondary audio-pause-btn d-none" data-question="{{ question.question_number }}">
+                                                    <i class="fas fa-pause me-2"></i>Pause
+                                                </button>
+                                            </div>
+                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
+                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
+                                            </audio>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Answer Options -->
+                                <div class="answer-options">
+                                    {% for option in ['A', 'B', 'C', 'D'] %}
+                                    {% if question['option_' + option.lower()] %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_{{ option }}"
+                                               value="{{ option }}"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_{{ option }}">
+                                            ({{ option }}) <span class="audio-option">Listen to audio</span>
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Part II Content -->
+                    <div class="part-content" id="part-2" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part II: Question-Response</h4>
+                            <p class="text-muted">
+                                Directions: You will hear a question or statement and three responses spoken in English. 
+                                They will not be printed in your test book and will be spoken only one time. 
+                                Select the best response to the question or statement.
+                            </p>
+                        </div>
+                        
+                        {% for question in questions %}
+                            {% if question.part == 2 %}
+                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
+                                <div class="question-header">
+                                    <h6>Question {{ question.question_number }}</h6>
+                                </div>
+                                
+                                <div class="audio-section mb-3">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-headphones fa-3x text-muted mb-3"></i>
+                                            <p class="mb-2">Listen to the question and three responses.</p>
+                                            <div class="audio-controls">
+                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
+                                                    <i class="fas fa-play me-2"></i>Play Audio
+                                                </button>
+                                            </div>
+                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
+                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
+                                            </audio>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="answer-options">
+                                    {% for option in ['A', 'B', 'C'] %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_{{ option }}"
+                                               value="{{ option }}"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_{{ option }}">
+                                            ({{ option }}) <span class="audio-option">Listen to audio</span>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Reading Parts (V-VII) -->
+                    {% for part_num in [5, 6, 7] %}
+                    <div class="part-content" id="part-{{ part_num }}" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part {{ ['', '', '', '', '', 'V', 'VI', 'VII'][part_num] }}: 
+                                {{ ['', '', '', '', '', 'Incomplete Sentences', 'Text Completion', 'Reading Comprehension'][part_num] }}
+                            </h4>
+                            {% if part_num == 5 %}
+                            <p class="text-muted">
+                                Directions: A word or phrase is missing in each of the sentences below. 
+                                Four answer choices are given below each sentence. Select the best answer to complete the sentence.
+                            </p>
+                            {% elif part_num == 6 %}
+                            <p class="text-muted">
+                                Directions: Read the texts that follow. A word, phrase, or sentence is missing in parts of each text. 
+                                Four answer choices for each question are given below the text. Select the best answer to complete the text.
+                            </p>
+                            {% else %}
+                            <p class="text-muted">
+                                Directions: In this part you will read a selection of texts, such as magazine and newspaper articles, letters, and advertisements. 
+                                Each text is followed by several questions. Select the best answer for each question.
+                            </p>
+                            {% endif %}
+                        </div>
+                        
+                        {% for question in questions %}
+                            {% if question.part == part_num %}
+                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
+                                {% if question.passage_text %}
+                                <div class="passage-text bg-light p-3 mb-3 rounded">
+                                    {{ question.passage_text|safe }}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="question-header">
+                                    <h6>{{ question.question_number }}. {{ question.question_text }}</h6>
+                                </div>
+                                
+                                <div class="answer-options">
+                                    {% for option in ['A', 'B', 'C', 'D'] %}
+                                    {% if question['option_' + option.lower()] %}
+                                    <div class="form-check answer-option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="question_{{ question.question_number }}" 
+                                               id="q{{ question.question_number }}_{{ option }}"
+                                               value="{{ option }}"
+                                               data-question="{{ question.question_number }}">
+                                        <label class="form-check-label" for="q{{ question.question_number }}_{{ option }}">
+                                            {{ question['option_' + option.lower()] }}
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="exam-navigation mt-4 p-3 bg-light rounded">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary" id="prevPartBtn" disabled>
+                            <i class="fas fa-chevron-left me-2"></i>Previous Part
+                        </button>
+                        <button class="btn btn-danger" id="submitExamBtn">
+                            <i class="fas fa-flag-checkered me-2"></i>Submit Exam
+                        </button>
+                        <button class="btn btn-outline-secondary" id="nextPartBtn">
+                            Next Part<i class="fas fa-chevron-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Navigator -->
+            <div class="col-lg-3">
+                <div class="question-navigator bg-light p-3 rounded sticky-top">
+                    <h6 class="mb-3">
+                        <span id="navigatorTitle">Part I</span>
+                        <span class="float-end">
+                            <button class="btn btn-sm btn-outline-secondary me-1" id="navPrevBtn" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" id="navNextBtn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </span>
+                    </h6>
+                    
+                    <div class="question-bubbles">
+                        {% for part in range(1, 8) %}
+                        <div class="part-bubbles" id="bubbles-part-{{ part }}" style="{{ 'display: block;' if part == 1 else 'display: none;' }}">
+                            {% for question in questions %}
+                                {% if question.part == part %}
+                                <button class="question-bubble btn btn-outline-secondary btn-sm m-1" 
+                                        data-question="{{ question.question_number }}"
+                                        id="bubble-{{ question.question_number }}">
+                                    {{ question.question_number }}
+                                </button>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="legend mt-3">
+                        <small class="text-muted">
+                            <div><span class="badge bg-secondary me-1">■</span> Unanswered</div>
+                            <div><span class="badge bg-success me-1">■</span> Answered</div>
+                            <div><span class="badge bg-primary me-1">■</span> Current</div>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Confirmation Modal -->
+<div class="modal fade" id="submitModal" tabindex="-1" aria-labelledby="submitModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="submitModalLabel">Submit Exam</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to submit your exam?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="unansweredCount">0</span> questions remain unanswered.
+                </div>
+                <p class="mb-0">Once submitted, you cannot make any changes to your answers.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('submit_exam') }}" class="d-inline">
+                    <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-flag-checkered me-2"></i>Submit Exam
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for saving answers -->
+<form id="saveAnswerForm" style="display: none;">
+    <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+    <input type="hidden" name="question_number" id="saveQuestionNumber">
+    <input type="hidden" name="answer" id="saveAnswer">
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const ATTEMPT_ID = {{ attempt.id }};
+    const TIME_REMAINING = {{ time_remaining }};
+</script>
+<script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+<script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+<script src="{{ url_for('static', filename='js/audio.js') }}"></script>
+{% endblock %}

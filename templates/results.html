@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Results - TOEIC Practice Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chart-bar me-2"></i>Test Results</h2>
+                <a href="{{ url_for('home') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Take New Test
+                </a>
+            </div>
+
+            {% if attempts %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Listening</th>
+                                    <th>Reading</th>
+                                    <th>Total Score</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attempt in attempts %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-calendar me-2 text-muted"></i>
+                                        {{ attempt.start_time.strftime('%Y-%m-%d') }}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ attempt.start_time.strftime('%H:%M') }} → 
+                                            {{ attempt.end_time.strftime('%H:%M') if attempt.end_time else 'In Progress' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="score-cell">
+                                            <strong>{{ attempt.listening_score or 'N/A' }}</strong>
+                                            {% if attempt.listening_correct is not none %}
+                                            <br><small class="text-muted">{{ attempt.listening_correct }}/100 correct</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="score-cell">
+                                            <strong>{{ attempt.reading_score or 'N/A' }}</strong>
+                                            {% if attempt.reading_correct is not none %}
+                                            <br><small class="text-muted">{{ attempt.reading_correct }}/100 correct</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="total-score">
+                                            <h5 class="mb-0 text-primary">{{ attempt.total_score or 'N/A' }}</h5>
+                                            <small class="text-muted">/ 990</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if attempt.status == 'completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Completed
+                                            </span>
+                                        {% elif attempt.status == 'auto_submitted' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>Auto-submitted
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-pause me-1"></i>{{ attempt.status|title }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#detailModal{{ attempt.id }}">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Distribution Chart -->
+            {% if attempts %}
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Score Progress</h5>
+                            <canvas id="scoreChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Performance Summary</h5>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <h3 class="text-primary">{{ attempts|length }}</h3>
+                                    <p class="text-muted mb-0">Total Attempts</p>
+                                </div>
+                                <div class="stat-item">
+                                    <h3 class="text-success">{{ (attempts|selectattr('total_score')|map(attribute='total_score')|max) or 'N/A' }}</h3>
+                                    <p class="text-muted mb-0">Best Score</p>
+                                </div>
+                                <div class="stat-item">
+                                    <h3 class="text-info">{{ ((attempts|selectattr('total_score')|map(attribute='total_score')|sum) / (attempts|selectattr('total_score')|list|length))|round|int if (attempts|selectattr('total_score')|list|length) > 0 else 'N/A' }}</h3>
+                                    <p class="text-muted mb-0">Average Score</p>
+                                </div>
+                                <div class="stat-item">
+                                    <h3 class="text-warning">{{ attempts|selectattr('status', 'equalto', 'completed')|list|length }}</h3>
+                                    <p class="text-muted mb-0">Completed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+                <h4>No Test Results Yet</h4>
+                <p class="text-muted mb-4">You haven't taken any practice tests yet. Start your first test to see your results here.</p>
+                <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-play me-2"></i>Take Your First Test
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modals -->
+{% for attempt in attempts %}
+<div class="modal fade" id="detailModal{{ attempt.id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ attempt.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel{{ attempt.id }}">
+                    Test Details - {{ attempt.start_time.strftime('%Y-%m-%d %H:%M') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Test Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Start Time:</strong></td>
+                                <td>{{ attempt.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>End Time:</strong></td>
+                                <td>{{ attempt.end_time.strftime('%Y-%m-%d %H:%M:%S') if attempt.end_time else 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Duration:</strong></td>
+                                <td>
+                                    {% if attempt.end_time %}
+                                        {{ ((attempt.end_time - attempt.start_time).total_seconds() / 60)|round|int }} minutes
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if attempt.status == 'completed' else 'warning' }}">
+                                        {{ attempt.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Score Breakdown</h6>
+                        <div class="score-breakdown">
+                            <div class="score-item mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span>Listening Score:</span>
+                                    <strong>{{ attempt.listening_score or 'N/A' }}/495</strong>
+                                </div>
+                                {% if attempt.listening_correct is not none %}
+                                <div class="progress mt-1">
+                                    <div class="progress-bar bg-info" style="width: {{ (attempt.listening_correct / 100 * 100)|round }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ attempt.listening_correct }}/100 correct ({{ (attempt.listening_correct / 100 * 100)|round }}%)</small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="score-item mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span>Reading Score:</span>
+                                    <strong>{{ attempt.reading_score or 'N/A' }}/495</strong>
+                                </div>
+                                {% if attempt.reading_correct is not none %}
+                                <div class="progress mt-1">
+                                    <div class="progress-bar bg-success" style="width: {{ (attempt.reading_correct / 100 * 100)|round }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ attempt.reading_correct }}/100 correct ({{ (attempt.reading_correct / 100 * 100)|round }}%)</small>
+                                {% endif %}
+                            </div>
+                            
+                            <hr>
+                            <div class="score-item">
+                                <div class="d-flex justify-content-between">
+                                    <span><strong>Total Score:</strong></span>
+                                    <strong class="text-primary fs-5">{{ attempt.total_score or 'N/A' }}/990</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if attempt.get_answers() %}
+                <hr>
+                <h6>Answer Summary</h6>
+                <div class="answer-summary">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Questions Answered:</strong> {{ attempt.get_answers()|length }}/200</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Completion Rate:</strong> {{ (attempt.get_answers()|length / 200 * 100)|round }}%</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if attempts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Score Progress Chart
+const ctx = document.getElementById('scoreChart').getContext('2d');
+const attempts = {{ attempts|map(attribute='total_score')|select|list|tojson }};
+const dates = {{ attempts|map(attribute='start_time')|map('strftime', '%m/%d')|list|tojson }};
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Total Score',
+            data: attempts,
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 990
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

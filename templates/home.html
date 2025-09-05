@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Home - TOEIC Practice Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Main Banner -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card text-center">
+                <div class="card-body p-5">
+                    <h1 class="display-4 mb-4">
+                        <i class="fas fa-headphones text-primary me-3"></i>
+                        ONLINE TOEIC Practice Test
+                    </h1>
+                    <p class="lead mb-4">Complete 7-part TOEIC examination</p>
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <div class="feature-item">
+                                <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                <h5>120 Minutes</h5>
+                                <p class="text-muted">Total Test Time</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-item">
+                                <i class="fas fa-list-ol fa-2x text-success mb-2"></i>
+                                <h5>200 Questions</h5>
+                                <p class="text-muted">Listening & Reading</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-item">
+                                <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                                <h5>TOEIC Scoring</h5>
+                                <p class="text-muted">10-990 Scale</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if in_progress %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-play-circle me-2"></i>
+                            You have an exam in progress. Would you like to resume?
+                        </div>
+                        <a href="{{ url_for('exam', attempt_id=in_progress.id) }}" class="btn btn-success btn-lg me-3">
+                            <i class="fas fa-play me-2"></i>Resume Exam
+                        </a>
+                        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#rulesModal">
+                            <i class="fas fa-plus me-2"></i>Start New Exam
+                        </button>
+                    {% else %}
+                        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#rulesModal">
+                            <i class="fas fa-play me-2"></i>Start New Exam
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio Test Section -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-volume-up me-2"></i>TEST AUDIO
+                    </h5>
+                    <p class="card-text text-muted">Test your audio before starting the exam</p>
+                    <div class="audio-controls">
+                        <button id="playAudioBtn" class="btn btn-outline-primary">
+                            <i class="fas fa-play me-2"></i>Play Sample Audio
+                        </button>
+                        <div class="audio-progress mt-2">
+                            <small class="text-muted">
+                                <span id="audioTime">0:00</span> / <span id="audioDuration">1:17</span>
+                            </small>
+                            <div class="progress mt-1">
+                                <div class="progress-bar" id="audioProgressBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <audio id="sampleAudio" preload="metadata">
+                        <source src="{{ url_for('static', filename='audio/sample.mp3') }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rules Modal -->
+<div class="modal fade" id="rulesModal" tabindex="-1" aria-labelledby="rulesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rulesModalLabel">QUI ĐỊNH PHÒNG THI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="rules-content">
+                    <h6 class="text-primary">Test Time and Format:</h6>
+                    <ul class="mb-3">
+                        <li>Total test time: <strong>120 minutes</strong></li>
+                        <li>Total questions: <strong>200 questions</strong></li>
+                        <li>Format: Listening (100 questions) + Reading (100 questions)</li>
+                        <li>No breaks during the exam</li>
+                    </ul>
+                    
+                    <h6 class="text-primary">Exam Rules:</h6>
+                    <ul class="mb-3">
+                        <li>Answer all questions to the best of your ability</li>
+                        <li>You can navigate between questions and change answers</li>
+                        <li>Your progress is automatically saved</li>
+                        <li>Time will be displayed at the top of the screen</li>
+                        <li>The exam will auto-submit when time expires</li>
+                    </ul>
+                    
+                    <h6 class="text-primary">Audio Instructions:</h6>
+                    <ul class="mb-3">
+                        <li>Test your audio before starting</li>
+                        <li>Listening sections will play automatically</li>
+                        <li>You can replay audio in practice mode</li>
+                        <li>Use headphones for best experience</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> Once you start the exam, the timer cannot be paused. 
+                        Make sure you have a stable internet connection and 120 minutes available.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form method="POST" action="{{ url_for('start_exam') }}" class="d-inline">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Start Exam
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/audio.js') }}"></script>
+{% endblock %}
