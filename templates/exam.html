@@ -16,6 +16,9 @@
                 </div>
                 <div class="col-md-4 text-center">
                     <h5 class="mb-0">TOEIC Practice Test</h5>
+                    {% if current_test_set %}
+                    <div class="small text-warning mt-1">Assigned: {{ current_test_set }}</div>
+                    {% endif %}
                 </div>
                 <div class="col-md-4 text-end">
                     <div class="progress-display">
@@ -29,24 +32,45 @@
         </div>
     </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Main Content Area -->
-            <div class="col-lg-9">
-                <!-- Part Tabs -->
-                <div class="part-tabs bg-light p-2 mb-3">
-                    <nav class="nav nav-pills">
-                        {% for part in range(1, 8) %}
-                        <button class="nav-link part-tab {{ 'active' if part == 1 else '' }}" 
-                                data-part="{{ part }}" id="tab-part-{{ part }}">
-                            Part {{ ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][part-1] }}
-                        </button>
-                        {% endfor %}
+    <!-- Part Navigation Bar -->
+    <div class="part-navigation bg-light border-bottom py-2">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <nav class="nav nav-pills nav-fill">
+                        <a class="nav-link active" href="#" data-part="1" onclick="switchPart(1)">
+                            <i class="fas fa-camera me-1"></i>Part I
+                        </a>
+                        <a class="nav-link" href="#" data-part="2" onclick="switchPart(2)">
+                            <i class="fas fa-comments me-1"></i>Part II
+                        </a>
+                        <a class="nav-link" href="#" data-part="3" onclick="switchPart(3)">
+                            <i class="fas fa-users me-1"></i>Part III
+                        </a>
+                        <a class="nav-link" href="#" data-part="4" onclick="switchPart(4)">
+                            <i class="fas fa-microphone me-1"></i>Part IV
+                        </a>
+                        <a class="nav-link" href="#" data-part="5" onclick="switchPart(5)">
+                            <i class="fas fa-edit me-1"></i>Part V
+                        </a>
+                        <a class="nav-link" href="#" data-part="6" onclick="switchPart(6)">
+                            <i class="fas fa-file-text me-1"></i>Part VI
+                        </a>
+                        <a class="nav-link" href="#" data-part="7" onclick="switchPart(7)">
+                            <i class="fas fa-book-open me-1"></i>Part VII
+                        </a>
                     </nav>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Question Content -->
-                <div id="questionContent" class="question-content">
+    <!-- Main Content Area -->
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <div class="exam-content">
                     <!-- Part I Content -->
                     <div class="part-content" id="part-1" style="display: block;">
                         <div class="part-header mb-4">
@@ -57,6 +81,43 @@
                             </p>
                         </div>
                         
+                        <!-- Part 1 Complete Audio -->
+                        <div class="part1-audio mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Part I Audio - Complete</h6>
+                                    <small class="text-muted">This audio includes directions and all Part 1 questions</small>
+                                </div>
+                                <div class="card-body text-center">
+                                    <audio id="part1-complete-audio" controls preload="auto">
+                                        <source src="{{ url_for('static', filename='audio/JIM_s TOEIC LC TEST 01- Part 1.mp3') }}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                    <div class="mt-2">
+                                        <button id="part1-audio-btn" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-play me-2"></i>Play Part I Complete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Section -->
+                        <div class="example-section mb-4">
+                            <h5>Example</h5>
+                            <div class="example-image mb-3 text-center">
+                                <img src="{{ url_for('static', filename='images/Test 1/Test 1 - question 0.png') }}" 
+                                     alt="Part 1 Instruction" 
+                                     class="img-fluid rounded border"
+                                     style="width: 100%; height: auto;">
+                            </div>
+                            <p class="text-muted">
+                                Statement (B) "They're talking in a group." is the best description of the picture, 
+                                so you should select answer (B) and mark it on your answer sheet.
+                            </p>
+                        </div>
+                        
+                        <!-- Questions -->
                         {% for question in questions %}
                             {% if question.part == 1 %}
                             <div class="question-block mb-4" id="question-{{ question.question_number }}">
@@ -64,539 +125,540 @@
                                     <h6>Question {{ question.question_number }}</h6>
                                 </div>
                                 
-                                <!-- Audio Controls for Listening Parts -->
-                                <div class="audio-section mb-3">
-                                    <div class="card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-image fa-3x text-muted mb-3"></i>
-                                            <p class="mb-2">Look at the picture and listen to the four statements.</p>
-                                            <div class="audio-controls">
-                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
-                                                    <i class="fas fa-play me-2"></i>Play Audio
-                                                </button>
-                                                <button class="btn btn-secondary audio-pause-btn d-none" data-question="{{ question.question_number }}">
-                                                    <i class="fas fa-pause me-2"></i>Pause
-                                                </button>
-                                            </div>
-                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
-                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
-                                            </audio>
-                                        </div>
-                                    </div>
+                                {% if question.image_file %}
+                                <div class="question-image mb-3 text-center">
+                                    <img src="{{ url_for('static', filename='images/' + question.image_file) }}" 
+                                        alt="Question {{ question.question_number }}" 
+                                        class="img-fluid rounded border"
+                                        style="width: 100%; height: auto;">
                                 </div>
+                                {% endif %}
                                 
-                                <!-- Answer Options -->
-                                <div class="answer-options">
-                                    {% if question.option_a %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_A"
-                                               value="A"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
-                                            {{ question.option_a }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_b %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_B"
-                                               value="B"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
-                                            {{ question.option_b }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_c %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_C"
-                                               value="C"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
-                                            {{ question.option_c }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_d %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_D"
-                                               value="D"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
-                                            {{ question.option_d }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                </div>
+                                <!-- Note: Audio is played from the top audio player -->
                             </div>
                             {% endif %}
                         {% endfor %}
                     </div>
-
+                    
                     <!-- Part II Content -->
                     <div class="part-content" id="part-2" style="display: none;">
                         <div class="part-header mb-4">
                             <h4>Part II: Question-Response</h4>
                             <p class="text-muted">
-                                Directions: You will hear a question or statement and three responses spoken in English. 
-                                They will not be printed in your test book and will be spoken only one time. 
-                                Select the best response to the question or statement.
+                                Directions: You will hear a question or statement and three responses. Choose the response that best answers the question or completes the statement.
                             </p>
                         </div>
-                        
-                        {% for question in questions %}
-                            {% if question.part == 2 %}
-                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
-                                <div class="question-header">
-                                    <h6>Question {{ question.question_number }}</h6>
+                        <!-- Part 2 Complete Audio -->
+                        <div class="part2-audio mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Part II Audio - Complete</h6>
+                                    <small class="text-muted">This audio includes directions and all Part 2 questions</small>
                                 </div>
-                                
-                                <div class="audio-section mb-3">
-                                    <div class="card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-headphones fa-3x text-muted mb-3"></i>
-                                            <p class="mb-2">Listen to the question and three responses.</p>
-                                            <div class="audio-controls">
-                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
-                                                    <i class="fas fa-play me-2"></i>Play Audio
-                                                </button>
-                                            </div>
-                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
-                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
-                                            </audio>
-                                        </div>
+                                <div class="card-body text-center">
+                                    <audio id="part2-complete-audio" controls preload="auto">
+                                        <source src="{{ url_for('static', filename='audio/JIM_s TOEIC LC TEST 01- Part 2.mp3') }}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                    <div class="mt-2">
+                                        <button id="part2-audio-btn" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-play me-2"></i>Play Part II Complete
+                                        </button>
                                     </div>
-                                </div>
-                                
-                                <div class="answer-options">
-                                    {% if question.option_a %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_A"
-                                               value="A"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
-                                            {{ question.option_a }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_b %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_B"
-                                               value="B"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
-                                            {{ question.option_b }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_c %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_C"
-                                               value="C"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
-                                            {{ question.option_c }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
                                 </div>
                             </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
+                        </div>
 
+                        <!-- Part II questions will be loaded here -->
+                    </div>
+                    
                     <!-- Part III Content -->
                     <div class="part-content" id="part-3" style="display: none;">
                         <div class="part-header mb-4">
                             <h4>Part III: Conversations</h4>
                             <p class="text-muted">
-                                Directions: You will hear some conversations between two or more people. 
-                                You will be asked to answer three questions about what the speakers say in each conversation. 
-                                Select the best response to each question.
+                                Directions: You will hear some conversations between two or more people. You will be asked to answer three questions about what the speakers say.
                             </p>
                         </div>
-                        
-                        {% for question in questions %}
-                            {% if question.part == 3 %}
-                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
-                                <div class="question-header">
-                                    <h6>Question {{ question.question_number }}</h6>
+                        <!-- Part 3 Complete Audio -->
+                        <div class="part3-audio mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Part III Audio - Complete</h6>
+                                    <small class="text-muted">This audio includes directions and all Part 3 questions</small>
                                 </div>
-                                
-                                <div class="audio-section mb-3">
-                                    <div class="card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
-                                            <p class="mb-2">Listen to the conversation and answer the questions.</p>
-                                            <div class="audio-controls">
-                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
-                                                    <i class="fas fa-play me-2"></i>Play Audio
-                                                </button>
-                                            </div>
-                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
-                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
-                                            </audio>
-                                        </div>
+                                <div class="card-body text-center">
+                                    <audio id="part3-complete-audio" controls preload="auto">
+                                        <source src="{{ url_for('static', filename='audio/JIM_s TOEIC LC TEST 01- Part 3.mp3') }}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                    <div class="mt-2">
+                                        <button id="part3-audio-btn" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-play me-2"></i>Play Part III Complete
+                                        </button>
                                     </div>
-                                </div>
-                                
-                                <div class="question-text mb-3">
-                                    <p><strong>{{ question.question_text }}</strong></p>
-                                </div>
-                                
-                                <div class="answer-options">
-                                    {% if question.option_a %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_A"
-                                               value="A"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
-                                            {{ question.option_a }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_b %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_B"
-                                               value="B"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
-                                            {{ question.option_b }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_c %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_C"
-                                               value="C"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
-                                            {{ question.option_c }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_d %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_D"
-                                               value="D"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
-                                            {{ question.option_d }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
                                 </div>
                             </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-
-                    <!-- Part IV Content -->
-                    <div class="part-content" id="part-4" style="display: none;">
-                        <div class="part-header mb-4">
-                            <h4>Part IV: Talks</h4>
-                            <p class="text-muted">
-                                Directions: You will hear some talks given by a single speaker. 
-                                You will be asked to answer three questions about what the speaker says in each talk. 
-                                Select the best response to each question.
-                            </p>
                         </div>
-                        
-                        {% for question in questions %}
-                            {% if question.part == 4 %}
-                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
-                                <div class="question-header">
-                                    <h6>Question {{ question.question_number }}</h6>
-                                </div>
-                                
-                                <div class="audio-section mb-3">
-                                    <div class="card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-microphone fa-3x text-muted mb-3"></i>
-                                            <p class="mb-2">Listen to the talk and answer the questions.</p>
-                                            <div class="audio-controls">
-                                                <button class="btn btn-primary audio-play-btn" data-question="{{ question.question_number }}">
-                                                    <i class="fas fa-play me-2"></i>Play Audio
-                                                </button>
-                                            </div>
-                                            <audio class="question-audio" data-question="{{ question.question_number }}" preload="metadata">
-                                                <source src="{{ url_for('static', filename='audio/' + question.audio_file) }}" type="audio/mpeg">
-                                            </audio>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="question-text mb-3">
-                                    <p><strong>{{ question.question_text }}</strong></p>
-                                </div>
-                                
-                                <div class="answer-options">
-                                    {% if question.option_a %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_A"
-                                               value="A"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
-                                            {{ question.option_a }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_b %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_B"
-                                               value="B"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
-                                            {{ question.option_b }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_c %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_C"
-                                               value="C"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
-                                            {{ question.option_c }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_d %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_D"
-                                               value="D"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
-                                            {{ question.option_d }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
 
-                    <!-- Reading Parts (V-VII) -->
-                    {% for part_num in [5, 6, 7] %}
-                    <div class="part-content" id="part-{{ part_num }}" style="display: none;">
-                        <div class="part-header mb-4">
-                            <h4>Part {{ ['', '', '', '', '', 'V', 'VI', 'VII'][part_num] }}: 
-                                {{ ['', '', '', '', '', 'Incomplete Sentences', 'Text Completion', 'Reading Comprehension'][part_num] }}
-                            </h4>
-                            {% if part_num == 5 %}
-                            <p class="text-muted">
-                                Directions: A word or phrase is missing in each of the sentences below. 
-                                Four answer choices are given below each sentence. Select the best answer to complete the sentence.
-                            </p>
-                            {% elif part_num == 6 %}
-                            <p class="text-muted">
-                                Directions: Read the texts that follow. A word, phrase, or sentence is missing in parts of each text. 
-                                Four answer choices for each question are given below the text. Select the best answer to complete the text.
-                            </p>
-                            {% else %}
-                            <p class="text-muted">
-                                Directions: In this part you will read a selection of texts, such as magazine and newspaper articles, letters, and advertisements. 
-                                Each text is followed by several questions. Select the best answer for each question.
-                            </p>
-                            {% endif %}
-                        </div>
-                        
-                        {% for question in questions %}
-                            {% if question.part == part_num %}
-                            <div class="question-block mb-4" id="question-{{ question.question_number }}">
-                                {% if question.passage_text %}
-                                <div class="passage-text bg-light p-3 mb-3 rounded">
-                                    {{ question.passage_text|safe }}
-                                </div>
-                                {% endif %}
-                                
-                                <div class="question-header">
-                                    <h6>{{ question.question_number }}. {{ question.question_text }}</h6>
-                                </div>
-                                
-                                <div class="answer-options">
-                                    {% if question.option_a %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_A"
-                                               value="A"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_A">
-                                            {{ question.option_a }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_b %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_B"
-                                               value="B"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_B">
-                                            {{ question.option_b }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_c %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_C"
-                                               value="C"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_C">
-                                            {{ question.option_c }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                    {% if question.option_d %}
-                                    <div class="form-check answer-option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="question_{{ question.question_number }}" 
-                                               id="q{{ question.question_number }}_D"
-                                               value="D"
-                                               data-question="{{ question.question_number }}">
-                                        <label class="form-check-label" for="q{{ question.question_number }}_D">
-                                            {{ question.option_d }}
-                                        </label>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Navigation Controls -->
-                <div class="exam-navigation mt-4 p-3 bg-light rounded">
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-outline-secondary" id="prevPartBtn" disabled>
-                            <i class="fas fa-chevron-left me-2"></i>Previous Part
-                        </button>
-                        <button class="btn btn-danger" id="submitExamBtn">
-                            <i class="fas fa-flag-checkered me-2"></i>Submit Exam
-                        </button>
-                        <button class="btn btn-outline-secondary" id="nextPartBtn">
-                            Next Part<i class="fas fa-chevron-right ms-2"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Question Navigator -->
-            <div class="col-lg-3">
-                <div class="question-navigator bg-light p-3 rounded sticky-top">
-                    <h6 class="mb-3">
-                        <span id="navigatorTitle">Part I</span>
-                        <span class="float-end">
-                            <button class="btn btn-sm btn-outline-secondary me-1" id="navPrevBtn" disabled>
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary" id="navNextBtn">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </span>
-                    </h6>
-                    
-                    <div class="question-bubbles">
-                        {% for part in range(1, 8) %}
-                        <div class="part-bubbles" id="bubbles-part-{{ part }}" style="{{ 'display: block;' if part == 1 else 'display: none;' }}">
+                        <!-- Part III questions will be loaded here -->
+                        <div class="mt-4">
                             {% for question in questions %}
-                                {% if question.part == part %}
-                                <button class="question-bubble btn btn-outline-secondary btn-sm m-1" 
-                                        data-question="{{ question.question_number }}"
-                                        id="bubble-{{ question.question_number }}">
-                                    {{ question.question_number }}
-                                </button>
+                                {% if question.part == 3 and question.question_number >= 41 and question.question_number <= 70 %}
+                                <div class="question-block mb-3" id="question-{{ question.question_number }}">
+                                    <div class="question-header mb-2">
+                                        <h6>Question {{ question.question_number }}</h6>
+                                        {% if question.question_text %}
+                                        <div class="text-muted small">{{ question.question_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                    {% if question.image_file %}
+                                    <div class="question-image mb-3 text-center">
+                                        <img src="{{ url_for('static', filename='images/' + question.image_file) }}"
+                                             alt="Question {{ question.question_number }}"
+                                             class="img-fluid rounded border"
+                                             style="width: 100%; height: auto;">
+                                        <div class="text-muted small mt-1">Image: /static/images/{{ question.image_file }}</div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}A" value="A" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}A">A. {{ question.option_a }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}B" value="B" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}B">B. {{ question.option_b }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}C" value="C" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}C">C. {{ question.option_c }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}D" value="D" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}D">D. {{ question.option_d }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% endif %}
                             {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
                     
-                    <div class="legend mt-3">
-                        <small class="text-muted">
-                            <div><span class="badge bg-secondary me-1">■</span> Unanswered</div>
-                            <div><span class="badge bg-success me-1">■</span> Answered</div>
-                            <div><span class="badge bg-primary me-1">■</span> Current</div>
-                        </small>
+                    <!-- Part IV Content -->
+                    <div class="part-content" id="part-4" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part IV: Short Talks</h4>
+                            <p class="text-muted">
+                                Directions: You will hear some talks given by a single speaker. You will be asked to answer three questions about what the speaker says.
+                            </p>
+                        </div>
+                        <!-- Part 4 Complete Audio -->
+                        <div class="part4-audio mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Part IV Audio - Complete</h6>
+                                    <small class="text-muted">This audio includes directions and all Part 4 questions</small>
+                                </div>
+                                <div class="card-body text-center">
+                                    <audio id="part4-complete-audio" controls preload="auto">
+                                        <source src="{{ url_for('static', filename='audio/JIM_s TOEIC LC TEST 01- Part 4.mp3') }}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                    <div class="mt-2">
+                                        <button id="part4-audio-btn" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-play me-2"></i>Play Part IV Complete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Part IV questions will be loaded here -->
+                        <div class="mt-4">
+                            {% for question in questions %}
+                                {% if question.part == 4 and question.question_number >= 71 and question.question_number <= 100 %}
+                                <div class="question-block mb-3" id="question-{{ question.question_number }}">
+                                    <div class="question-header mb-2">
+                                        <h6>Question {{ question.question_number }}</h6>
+                                        {% if question.question_text %}
+                                        <div class="text-muted small">{{ question.question_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                    {% if question.image_file %}
+                                    <div class="question-image mb-3 text-center">
+                                        <img src="{{ url_for('static', filename='images/' + question.image_file) }}"
+                                             alt="Question {{ question.question_number }}"
+                                             class="img-fluid rounded border"
+                                             style="width: 100%; height: auto;">
+                                    </div>
+                                    {% endif %}
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}A" value="A" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}A">A. {{ question.option_a }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}B" value="B" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}B">B. {{ question.option_b }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}C" value="C" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}C">C. {{ question.option_c }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}D" value="D" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}D">D. {{ question.option_d }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Part V Content -->
+                    <div class="part-content" id="part-5" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part V: Incomplete Sentences</h4>
+                            <p class="text-muted">
+                                Directions: A word or phrase is missing in each of the following sentences. Four answer choices for each question are given below the sentence.
+                            </p>
+                        </div>
+                        <!-- Part V questions will be loaded here -->
+                        <div class="mt-4">
+                            {% for question in questions %}
+                                {% if question.part == 5 and question.question_number >= 101 and question.question_number <= 140 %}
+                                <div class="question-block mb-3" id="question-{{ question.question_number }}">
+                                    <div class="question-header mb-2">
+                                        <h6>Question {{ question.question_number }}</h6>
+                                        {% if question.question_text %}
+                                        <div class="text-muted small">{{ question.question_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}A" value="A" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}A">A. {{ question.option_a }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}B" value="B" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}B">B. {{ question.option_b }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}C" value="C" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}C">C. {{ question.option_c }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}D" value="D" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}D">D. {{ question.option_d }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Part VI Content -->
+                    <div class="part-content" id="part-6" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part VI: Text Completion</h4>
+                            <p class="text-muted">
+                                Directions: Read the texts that follow. A word, phrase, or sentence is missing in parts of each text. Four answer choices for each question are given below the text.
+                            </p>
+                        </div>
+                        <!-- Part VI questions will be loaded here -->
+                        <div class="mt-4">
+                            {% for question in questions %}
+                                {% if question.part == 6 and question.question_number >= 141 and question.question_number <= 152 %}
+                                <div class="question-block mb-3" id="question-{{ question.question_number }}">
+                                    <div class="question-header mb-2">
+                                        <h6>Question {{ question.question_number }}</h6>
+                                        {% if question.question_text %}
+                                        <div class="text-muted small">{{ question.question_text }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if question.image_file %}
+                                    <div class="question-image mb-3 text-center">
+                                        <img src="{{ url_for('static', filename='images/' + question.image_file) }}" 
+                                            alt="Question {{ question.question_number }}" 
+                                            class="img-fluid rounded border"
+                                            style="width: 100%; height: auto;">
+                                    </div>
+                                    {% endif %}
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}A" value="A" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}A">A. {{ question.option_a }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}B" value="B" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}B">B. {{ question.option_b }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}C" value="C" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}C">C. {{ question.option_c }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}D" value="D" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}D">D. {{ question.option_d }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Part VII Content -->
+                    <div class="part-content" id="part-7" style="display: none;">
+                        <div class="part-header mb-4">
+                            <h4>Part VII: Reading Comprehension</h4>
+                            <p class="text-muted">
+                                Directions: In this part you will read a selection of texts, such as magazine and newspaper articles, letters, and advertisements. Each text is followed by several questions.
+                            </p>
+                        </div>
+                        <!-- Part VII questions will be loaded here -->
+                        <div class="mt-4">
+                            {% for question in questions %}
+                                {% if question.part == 7 and question.question_number >= 153 and question.question_number <= 200 %}
+                                <div class="question-block mb-3" id="question-{{ question.question_number }}">
+                                    <div class="question-header mb-2">
+                                        <h6>Question {{ question.question_number }}</h6>
+                                        {% if question.question_text %}
+                                        <div class="text-muted small">{{ question.question_text }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if question.image_file %}
+                                    <div class="question-image mb-3 text-center">
+                                        <img src="{{ url_for('static', filename='images/' + question.image_file) }}" 
+                                            alt="Question {{ question.question_number }}" 
+                                            class="img-fluid rounded border"
+                                             style="width: 100%; height: auto;">
+                                    </div>
+                                    
+                                    {% endif %}
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}A" value="A" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}A">A. {{ question.option_a }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}B" value="B" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}B">B. {{ question.option_b }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}C" value="C" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}C">C. {{ question.option_c }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="question_{{ question.question_number }}" id="q{{ question.question_number }}D" value="D" data-question="{{ question.question_number }}">
+                                                <label class="form-check-label" for="q{{ question.question_number }}D">D. {{ question.option_d }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Answer Sheet -->
+            <div class="col-lg-4">
+                <div class="answer-sheet sticky-top" style="top: 80px;">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Answer Sheet</h5>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="answer-grid">
+                                {% for part in range(1, 8) %}
+                                <div class="part-section mb-3" id="answer-part-{{ part }}" style="display: {{ 'block' if part == 1 else 'none' }};">
+                                    <h6 class="text-muted mb-2">Part {{ ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][part-1] }}</h6>
+                                    <div class="row g-1">
+                                        {% if part == 1 %}
+                                            {% set start = 1 %}{% set end = 10 %}
+                                            {% for qnum in range(start, end + 1) %}
+                                            <div class="col-3">
+                                                <div class="answer-option-card" data-question="{{ qnum }}" data-part="{{ part }}">
+                                                    <div class="question-number">{{ qnum }}</div>
+                                                    <div class="answer-options">
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="D" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">D</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% elif part == 2 %}
+                                            {% set start = 11 %}{% set end = 40 %}
+                                            {% for qnum in range(start, end + 1) %}
+                                            <div class="col-3">
+                                                <div class="answer-option-card" data-question="{{ qnum }}" data-part="{{ part }}">
+                                                    <div class="question-number">{{ qnum }}</div>
+                                                    <div class="answer-options">
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% elif part == 3 %}
+                                            {% set start = 41 %}{% set end = 70 %}
+                                            {% for qnum in range(start, end + 1) %}
+                                            <div class="col-3">
+                                                <div class="answer-option-card" data-question="{{ qnum }}" data-part="{{ part }}">
+                                                    <div class="question-number">{{ qnum }}</div>
+                                                    <div class="answer-options">
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="D" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">D</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% elif part == 4 %}
+                                            {% set start = 71 %}{% set end = 100 %}
+                                            {% for qnum in range(start, end + 1) %}
+                                            <div class="col-3">
+                                                <div class="answer-option-card" data-question="{{ qnum }}" data-part="{{ part }}">
+                                                    <div class="question-number">{{ qnum }}</div>
+                                                    <div class="answer-options">
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="D" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">D</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% elif part == 5 %}
+                                            {% set start = 101 %}{% set end = 140 %}
+                                            {% for qnum in range(start, end + 1) %}
+                                            <div class="col-3">
+                                                <div class="answer-option-card" data-question="{{ qnum }}" data-part="{{ part }}">
+                                                    <div class="question-number">{{ qnum }}</div>
+                                                    <div class="answer-options">
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="D" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">D</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% elif part == 6 %}
+                                            {% set start = 141 %}{% set end = 152 %}
+                                            {% for qnum in range(start, end + 1) %}
+                                            <div class="col-3">
+                                                <div class="answer-option-card" data-question="{{ qnum }}" data-part="{{ part }}">
+                                                    <div class="question-number">{{ qnum }}</div>
+                                                    <div class="answer-options">
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="D" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">D</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% elif part == 7 %}
+                                            {% set start = 153 %}{% set end = 200 %}
+                                            {% for qnum in range(start, end + 1) %}
+                                            <div class="col-3">
+                                                <div class="answer-option-card" data-question="{{ qnum }}" data-part="{{ part }}">
+                                                    <div class="question-number">{{ qnum }}</div>
+                                                    <div class="answer-options">
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                        <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ qnum }}" data-answer="D" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">D</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for question in questions %}
+                                                {% if question.part == part %}
+                                                <div class="col-3">
+                                                    <div class="answer-option-card" data-question="{{ question.question_number }}" data-part="{{ part }}">
+                                                        <div class="question-number">{{ question.question_number }}</div>
+                                                        <div class="answer-options">
+                                                            <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ question.question_number }}" data-answer="A" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">A</button>
+                                                            <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ question.question_number }}" data-answer="B" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">B</button>
+                                                            <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ question.question_number }}" data-answer="C" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">C</button>
+                                                            <button class="btn btn-outline-primary btn-sm answer-btn" data-question="{{ question.question_number }}" data-answer="D" style="width: 20px; height: 20px; padding: 0; font-size: 10px;">D</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Submit Confirmation Modal -->
-<div class="modal fade" id="submitModal" tabindex="-1" aria-labelledby="submitModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="submitModalLabel">Submit Exam</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to submit your exam?</p>
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <span id="unansweredCount">0</span> questions remain unanswered.
-                </div>
-                <p class="mb-0">Once submitted, you cannot make any changes to your answers.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="POST" action="{{ url_for('submit_exam') }}" class="d-inline">
-                    <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-flag-checkered me-2"></i>Submit Exam
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Hidden form for saving answers -->
+    <form id="saveAnswerForm" style="display: none;">
+        <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+        <input type="hidden" name="question_number" id="saveQuestionNumber">
+        <input type="hidden" name="answer" id="saveAnswer">
+    </form>
 </div>
-
-<!-- Hidden form for saving answers -->
-<form id="saveAnswerForm" style="display: none;">
-    <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
-    <input type="hidden" name="question_number" id="saveQuestionNumber">
-    <input type="hidden" name="answer" id="saveAnswer">
-</form>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -607,4 +669,259 @@
 <script src="{{ url_for('static', filename='js/timer.js') }}"></script>
 <script src="{{ url_for('static', filename='js/exam.js') }}"></script>
 <script src="{{ url_for('static', filename='js/audio.js') }}"></script>
+
+<!-- Directions Audio Auto-Play Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const part1Audio = document.getElementById('part1-complete-audio');
+    const part1Btn = document.getElementById('part1-audio-btn');
+    
+    if (part1Audio && part1Btn) {
+        // Auto-play when page loads (if Part 1 is visible)
+        if (document.getElementById('part-1').style.display !== 'none') {
+            part1Audio.play().catch(e => {
+                console.log('Auto-play prevented by browser:', e);
+                // Show manual play button if auto-play fails
+                part1Btn.style.display = 'block';
+            });
+        }
+        
+        // Manual play button
+        part1Btn.addEventListener('click', function() {
+            if (part1Audio.paused) {
+                part1Audio.play();
+                this.innerHTML = '<i class="fas fa-pause me-2"></i>Pause Part I';
+            } else {
+                part1Audio.pause();
+                this.innerHTML = '<i class="fas fa-play me-2"></i>Play Part I Complete';
+            }
+        });
+        
+        // Update button when audio ends
+        part1Audio.addEventListener('ended', function() {
+            part1Btn.innerHTML = '<i class="fas fa-play me-2"></i>Replay Part I';
+        });
+        
+        // Optional: Show progress through questions as audio plays
+        part1Audio.addEventListener('timeupdate', function() {
+            const duration = part1Audio.duration;
+            const currentTime = part1Audio.currentTime;
+            const progress = (currentTime / duration) * 100;
+            
+            // You can add a progress bar here if desired
+            console.log(`Audio progress: ${progress.toFixed(1)}%`);
+        });
+    }
+});
+</script>
+
+<!-- Part Navigation JavaScript -->
+<script>
+function switchPart(partNumber) {
+    // Hide all part content
+    document.querySelectorAll('.part-content').forEach(part => {
+        part.style.display = 'none';
+    });
+    
+    // Show selected part
+    document.getElementById(`part-${partNumber}`).style.display = 'block';
+    
+    // Update navigation active state
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    document.querySelector(`[data-part="${partNumber}"]`).classList.add('active');
+    
+    // Update answer sheet visibility
+    document.querySelectorAll('.part-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    document.getElementById(`answer-part-${partNumber}`).style.display = 'block';
+    
+    // Load questions for this part if not already loaded
+    loadPartQuestions(partNumber);
+
+    // Handle audio per part
+    try {
+        const p1 = document.getElementById('part1-complete-audio');
+        const p2 = document.getElementById('part2-complete-audio');
+        const p3 = document.getElementById('part3-complete-audio');
+        const p4 = document.getElementById('part4-complete-audio');
+        if (p1 && partNumber !== 1) p1.pause();
+        if (p2 && partNumber !== 2) p2.pause();
+        if (p3 && partNumber !== 3) p3.pause();
+        if (p4 && partNumber !== 4) p4.pause();
+        if (p2 && partNumber === 2) {
+            p2.play().catch(() => {
+                const btn = document.getElementById('part2-audio-btn');
+                if (btn) btn.style.display = 'block';
+            });
+        }
+        if (p3 && partNumber === 3) {
+            p3.play().catch(() => {
+                const btn = document.getElementById('part3-audio-btn');
+                if (btn) btn.style.display = 'block';
+            });
+        }
+        if (p4 && partNumber === 4) {
+            p4.play().catch(() => {
+                const btn = document.getElementById('part4-audio-btn');
+                if (btn) btn.style.display = 'block';
+            });
+        }
+    } catch (e) { console.log(e); }
+}
+
+function loadPartQuestions(partNumber) {
+    // This function can be expanded to load questions dynamically
+    // For now, it just shows the part content
+    console.log(`Loading questions for Part ${partNumber}`);
+}
+
+// Initialize with Part 1
+document.addEventListener('DOMContentLoaded', function() {
+    switchPart(1);
+
+        // Wire Part 2 play/pause button
+        const p2 = document.getElementById('part2-complete-audio');
+        const p2Btn = document.getElementById('part2-audio-btn');
+        if (p2 && p2Btn) {
+            p2Btn.addEventListener('click', function() {
+                if (p2.paused) {
+                    p2.play().then(() => {
+                        p2Btn.innerHTML = '<i class="fas fa-pause me-2"></i>Pause Part II';
+                    }).catch(() => {});
+                } else {
+                    p2.pause();
+                    p2Btn.innerHTML = '<i class="fas fa-play me-2"></i>Play Part II Complete';
+                }
+            });
+            p2.addEventListener('ended', function() {
+                p2Btn.innerHTML = '<i class="fas fa-play me-2"></i>Replay Part II';
+            });
+        }
+        // Wire Part 3 play/pause button
+        const p3 = document.getElementById('part3-complete-audio');
+        const p3Btn = document.getElementById('part3-audio-btn');
+        if (p3 && p3Btn) {
+            p3Btn.addEventListener('click', function() {
+                if (p3.paused) {
+                    p3.play().then(() => {
+                        p3Btn.innerHTML = '<i class="fas fa-pause me-2"></i>Pause Part III';
+                    }).catch(() => {});
+                } else {
+                    p3.pause();
+                    p3Btn.innerHTML = '<i class="fas fa-play me-2"></i>Play Part III Complete';
+                }
+            });
+            p3.addEventListener('ended', function() {
+                p3Btn.innerHTML = '<i class="fas fa-play me-2"></i>Replay Part III';
+            });
+        }
+
+        // Wire Part 4 play/pause button
+        const p4 = document.getElementById('part4-complete-audio');
+        const p4Btn = document.getElementById('part4-audio-btn');
+        if (p4 && p4Btn) {
+            p4Btn.addEventListener('click', function() {
+                if (p4.paused) {
+                    p4.play().then(() => {
+                        p4Btn.innerHTML = '<i class="fas fa-pause me-2"></i>Pause Part IV';
+                    }).catch(() => {});
+                } else {
+                    p4.pause();
+                    p4Btn.innerHTML = '<i class="fas fa-play me-2"></i>Play Part IV Complete';
+                }
+            });
+            p4.addEventListener('ended', function() {
+                p4Btn.innerHTML = '<i class="fas fa-play me-2"></i>Replay Part IV';
+            });
+        }
+});
+</script>
+
+<!-- Answer Sheet JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle answer sheet clicks (delegate to central handler in exam.js)
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const questionNumber = parseInt(this.dataset.question);
+            const answer = this.dataset.answer;
+
+            if (window.toeicExam && typeof window.toeicExam.handleSelection === 'function') {
+                window.toeicExam.handleSelection(questionNumber, answer);
+            } else {
+                // Fallback visual update if controller isn't ready yet
+                document.querySelectorAll(`.answer-btn[data-question="${questionNumber}"]`).forEach(b => {
+                    if (b.dataset.answer === answer) {
+                        b.classList.remove('btn-outline-primary');
+                        b.classList.add('btn-primary');
+                    } else {
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-outline-primary');
+                    }
+                });
+                const form = document.getElementById('saveAnswerForm');
+                if (form) {
+                    form.querySelector('[name="question_number"]').value = questionNumber;
+                    form.querySelector('[name="answer"]').value = answer;
+                    fetch('/save_answer', { method: 'POST', body: new FormData(form) });
+                }
+            }
+        });
+    });
+});
+</script>
+
+<!-- Submit Exam Button -->
+<div class="fixed-bottom bg-white border-top p-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <button type="button" class="btn btn-success btn-lg" id="submitExamBtn" onclick="submitExam()">
+                    <i class="fas fa-check-circle me-2"></i>Submit Exam
+                </button>
+                <p class="text-muted mt-2 mb-0">
+                    <small>Make sure you have answered all questions before submitting</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Exam Form -->
+<form id="submitExamForm" method="POST" action="{{ url_for('submit_exam') }}" style="display: none;">
+    <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+</form>
+
+<script>
+function submitExam() {
+    // Show confirmation dialog
+    const confirmed = confirm('Are you sure you want to submit your exam? You cannot change your answers after submission.');
+    
+    if (confirmed) {
+        // Show loading state
+        const submitBtn = document.getElementById('submitExamBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+        submitBtn.disabled = true;
+        
+        // Submit the form
+        document.getElementById('submitExamForm').submit();
+    }
+}
+
+// Auto-save warning before page unload
+window.addEventListener('beforeunload', function(e) {
+    // Only show warning if exam is not completed
+    const submitBtn = document.getElementById('submitExamBtn');
+    if (submitBtn && !submitBtn.disabled) {
+        e.preventDefault();
+        e.returnValue = 'Your exam progress will be saved, but make sure to submit when finished.';
+        return e.returnValue;
+    }
+});
+</script>
 {% endblock %}

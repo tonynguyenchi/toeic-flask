@@ -262,7 +262,7 @@
 // Score Progress Chart
 const ctx = document.getElementById('scoreChart').getContext('2d');
 const attempts = {{ attempts|map(attribute='total_score')|select|list|tojson }};
-const dates = {{ attempts|map(attribute='start_time')|map('strftime', '%m/%d')|list|tojson }};
+const dates = {{ attempts|map(attribute='start_time')|list|tojson }};
 
 new Chart(ctx, {
     type: 'line',

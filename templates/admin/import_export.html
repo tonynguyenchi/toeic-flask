@@ -1,0 +1,311 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Import/Export{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-file-import me-2"></i>Import/Export Data</h1>
+    <div class="text-muted">
+        <small>Manage system data with CSV and Excel files</small>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Export Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-download me-2"></i>Export Data</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Export system data to CSV format for backup or analysis purposes.</p>
+                
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                                <h6>Users</h6>
+                                <p class="text-muted small">Export all user accounts</p>
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportData('users')">
+                                    <i class="fas fa-download me-1"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <i class="fas fa-question-circle fa-2x text-success mb-2"></i>
+                                <h6>Questions</h6>
+                                <p class="text-muted small">Export question bank</p>
+                                <button class="btn btn-outline-success btn-sm" onclick="exportData('questions')">
+                                    <i class="fas fa-download me-1"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <i class="fas fa-clipboard-list fa-2x text-info mb-2"></i>
+                                <h6>Exam Attempts</h6>
+                                <p class="text-muted small">Export exam results</p>
+                                <button class="btn btn-outline-info btn-sm" onclick="exportData('exams')">
+                                    <i class="fas fa-download me-1"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <i class="fas fa-history fa-2x text-warning mb-2"></i>
+                                <h6>Audit Logs</h6>
+                                <p class="text-muted small">Export activity logs</p>
+                                <button class="btn btn-outline-warning btn-sm" onclick="exportData('audit')">
+                                    <i class="fas fa-download me-1"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Import Data</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Import data from CSV or Excel files. Make sure your files follow the correct format.</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border">
+                            <div class="card-body">
+                                <h6><i class="fas fa-users me-2"></i>Import Users</h6>
+                                <p class="text-muted small">Import user accounts from CSV file</p>
+                                
+                                <form id="importUsersForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="usersFile" class="form-label">CSV File</label>
+                                        <input type="file" class="form-control" id="usersFile" accept=".csv" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="updateExistingUsers">
+                                            <label class="form-check-label" for="updateExistingUsers">
+                                                Update existing users
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-upload me-1"></i>Import Users
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border">
+                            <div class="card-body">
+                                <h6><i class="fas fa-question-circle me-2"></i>Import Questions</h6>
+                                <p class="text-muted small">Import questions from CSV or Excel file</p>
+                                
+                                <form id="importQuestionsForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="questionsFile" class="form-label">File</label>
+                                        <input type="file" class="form-control" id="questionsFile" accept=".csv,.xlsx" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="updateExistingQuestions">
+                                            <label class="form-check-label" for="updateExistingQuestions">
+                                                Update existing questions
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-upload me-1"></i>Import Questions
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Download Templates</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Download template files to ensure your imports follow the correct format.</p>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-csv fa-2x text-primary mb-2"></i>
+                                <h6>Users Template</h6>
+                                <p class="text-muted small">CSV template for user imports</p>
+                                <button class="btn btn-outline-primary btn-sm" onclick="downloadTemplate('users')">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-excel fa-2x text-success mb-2"></i>
+                                <h6>Questions Template</h6>
+                                <p class="text-muted small">Excel template for question imports</p>
+                                <button class="btn btn-outline-success btn-sm" onclick="downloadTemplate('questions')">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card border">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-alt fa-2x text-info mb-2"></i>
+                                <h6>Import Guide</h6>
+                                <p class="text-muted small">Step-by-step import instructions</p>
+                                <button class="btn btn-outline-info btn-sm" onclick="showImportGuide()">
+                                    <i class="fas fa-book me-1"></i>View Guide
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Guide Modal -->
+<div class="modal fade" id="importGuideModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Users Import Format</h6>
+                <p>CSV file should contain the following columns:</p>
+                <ul>
+                    <li><code>username</code> - Unique username (required)</li>
+                    <li><code>email</code> - Email address (required)</li>
+                    <li><code>first_name</code> - First name (optional)</li>
+                    <li><code>last_name</code> - Last name (optional)</li>
+                    <li><code>phone</code> - Phone number (optional)</li>
+                    <li><code>password</code> - Password (required for new users)</li>
+                    <li><code>is_active</code> - Active status (true/false)</li>
+                </ul>
+                
+                <hr>
+                
+                <h6>Questions Import Format</h6>
+                <p>Excel file should contain the following columns:</p>
+                <ul>
+                    <li><code>part</code> - Part number (1-7)</li>
+                    <li><code>question_number</code> - Question number</li>
+                    <li><code>question_text</code> - Question content</li>
+                    <li><code>option_a</code> - Answer option A</li>
+                    <li><code>option_b</code> - Answer option B</li>
+                    <li><code>option_c</code> - Answer option C</li>
+                    <li><code>option_d</code> - Answer option D</li>
+                    <li><code>correct_answer</code> - Correct answer (A, B, C, or D)</li>
+                    <li><code>test_set</code> - Test set identifier</li>
+                    <li><code>audio_file</code> - Audio file path (optional)</li>
+                    <li><code>image_file</code> - Image file path (optional)</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportData(type) {
+    const urls = {
+        'users': '{{ url_for("admin.export_users") }}',
+        'questions': '{{ url_for("admin.export_questions") }}',
+        'exams': '#', // Would be implemented
+        'audit': '#' // Would be implemented
+    };
+    
+    if (urls[type] === '#') {
+        alert('Export functionality for ' + type + ' will be implemented soon.');
+        return;
+    }
+    
+    fetch(urls[type])
+        .then(response => response.json())
+        .then(data => {
+            // Create download link
+            const blob = new Blob([data.csv_data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = data.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Export error:', error);
+            alert('Error exporting ' + type);
+        });
+}
+
+function downloadTemplate(type) {
+    // This would typically generate and download template files
+    alert('Template download for ' + type + ' will be implemented soon.');
+}
+
+function showImportGuide() {
+    const modal = new bootstrap.Modal(document.getElementById('importGuideModal'));
+    modal.show();
+}
+
+// Form submission handlers
+document.getElementById('importUsersForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('User import functionality will be implemented soon.');
+});
+
+document.getElementById('importQuestionsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Question import functionality will be implemented soon.');
+});
+</script>
+{% endblock %}

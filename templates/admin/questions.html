@@ -1,0 +1,223 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Question Bank{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-question-circle me-2"></i>Question Bank</h1>
+    {% if has_permission(current_user.id, 'question.create') %}
+    <a href="{{ url_for('admin.create_question') }}" class="btn btn-primary">
+        <i class="fas fa-plus-circle me-2"></i>Add Question
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search }}" placeholder="Question text...">
+            </div>
+            <div class="col-md-3">
+                <label for="part" class="form-label">Part</label>
+                <select class="form-select" id="part" name="part">
+                    <option value="">All Parts</option>
+                    {% for part in parts %}
+                    <option value="{{ part }}" {% if part_filter == part|string %}selected{% endif %}>
+                        Part {{ part }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="test_set" class="form-label">Test Set</label>
+                <select class="form-select" id="test_set" name="test_set">
+                    <option value="">All Test Sets</option>
+                    {% for test_set in test_sets %}
+                    <option value="{{ test_set }}" {% if test_set_filter == test_set %}selected{% endif %}>
+                        {{ test_set }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-1"></i>Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Questions Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Questions ({{ questions.total }} total)</h5>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportQuestions()">
+                <i class="fas fa-download me-1"></i>Export CSV
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if questions.items %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Part</th>
+                        <th>Q#</th>
+                        <th>Question Text</th>
+                        <th>Options</th>
+                        <th>Correct</th>
+                        <th>Test Set</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in questions.items %}
+                    <tr>
+                        <td>{{ question.id }}</td>
+                        <td>
+                            <span class="badge bg-primary">Part {{ question.part }}</span>
+                        </td>
+                        <td>{{ question.question_number }}</td>
+                        <td>
+                            <div class="text-truncate-2" style="max-width: 300px;">
+                                {{ question.question_text }}
+                            </div>
+                        </td>
+                        <td>
+                            <small>
+                                {% if question.option_a %}A: {{ question.option_a[:20] }}{% if question.option_a|length > 20 %}...{% endif %}<br>{% endif %}
+                                {% if question.option_b %}B: {{ question.option_b[:20] }}{% if question.option_b|length > 20 %}...{% endif %}<br>{% endif %}
+                                {% if question.option_c %}C: {{ question.option_c[:20] }}{% if question.option_c|length > 20 %}...{% endif %}<br>{% endif %}
+                                {% if question.option_d %}D: {{ question.option_d[:20] }}{% if question.option_d|length > 20 %}...{% endif %}{% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge bg-success">{{ question.correct_answer }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ question.test_set or 'N/A' }}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{{ url_for('admin.question_detail', question_id=question.id) }}" 
+                                   class="btn btn-outline-primary" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if has_permission(current_user.id, 'question.update') %}
+                                <a href="#" class="btn btn-outline-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                                {% if has_permission(current_user.id, 'question.delete') %}
+                                <a href="#" class="btn btn-outline-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if questions.pages > 1 %}
+        <div class="card-footer">
+            <nav aria-label="Questions pagination">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if questions.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.questions', page=questions.prev_num, search=search, part=part_filter, test_set=test_set_filter) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in questions.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != questions.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.questions', page=page_num, search=search, part=part_filter, test_set=test_set_filter) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if questions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.questions', page=questions.next_num, search=search, part=part_filter, test_set=test_set_filter) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No questions found</h5>
+            <p class="text-muted">Try adjusting your search criteria or add new questions.</p>
+            {% if has_permission(current_user.id, 'question.create') %}
+            <a href="{{ url_for('admin.create_question') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Add First Question
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportQuestions() {
+    if (confirm('Export all questions to CSV?')) {
+        fetch('{{ url_for("admin.export_questions") }}')
+            .then(response => response.json())
+            .then(data => {
+                // Create download link
+                const blob = new Blob([data.csv_data], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = data.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                alert('Error exporting questions');
+            });
+    }
+}
+</script>
+{% endblock %}

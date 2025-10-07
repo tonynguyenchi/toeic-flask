@@ -1,0 +1,153 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Create User{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-plus me-2"></i>Create User</h1>
+    <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Users
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">User Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <div class="form-text">Must be unique</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                                <div class="form-text">Must be unique</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password *</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="form-text">Minimum 8 characters</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                            <label class="form-check-label" for="is_active">
+                                Active User
+                            </label>
+                            <div class="form-text">Inactive users cannot log in</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Roles *</label>
+                        <div class="row">
+                            {% for role in roles %}
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="role_{{ role.id }}" 
+                                           name="roles" value="{{ role.id }}">
+                                    <label class="form-check-label" for="role_{{ role.id }}">
+                                        <strong>{{ role.display_name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ role.description }}</small>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-text">Select at least one role for the user</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('form');
+    const roleCheckboxes = document.querySelectorAll('input[name="roles"]');
+    
+    form.addEventListener('submit', function(e) {
+        const checkedRoles = Array.from(roleCheckboxes).filter(cb => cb.checked);
+        
+        if (checkedRoles.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one role for the user.');
+            return false;
+        }
+        
+        // Password strength check
+        const password = document.getElementById('password').value;
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters long.');
+            return false;
+        }
+    });
+    
+    // Username validation
+    const usernameInput = document.getElementById('username');
+    usernameInput.addEventListener('input', function() {
+        const value = this.value;
+        if (value && !/^[a-zA-Z0-9_]+$/.test(value)) {
+            this.setCustomValidity('Username can only contain letters, numbers, and underscores');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Organizations{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-sitemap me-2"></i>Organization Management</h1>
+    {% if has_permission(current_user.id, 'org.create') %}
+    <a href="{{ url_for('admin.create_year') }}" class="btn btn-primary">
+        <i class="fas fa-calendar-plus me-2"></i>New Academic Year
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Organization Hierarchy -->
+<div class="row">
+    {% for year in years %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>{{ year.name }}
+                </h5>
+                <span class="badge bg-{{ 'success' if year.is_active else 'secondary' }}">
+                    {{ 'Active' if year.is_active else 'Inactive' }}
+                </span>
+            </div>
+            <div class="card-body">
+                {% if year.programs %}
+                    <h6 class="text-muted mb-3">Programs ({{ year.programs|length }})</h6>
+                    {% for program in year.programs %}
+                    <div class="mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ program.name }}</h6>
+                                <small class="text-muted">Code: {{ program.code }}</small>
+                                {% if program.description %}
+                                <br>
+                                <small class="text-muted">{{ program.description }}</small>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-{{ 'success' if program.is_active else 'secondary' }}">
+                                {{ 'Active' if program.is_active else 'Inactive' }}
+                            </span>
+                        </div>
+                        
+                        {% if program.groups %}
+                        <div class="mt-2">
+                            <small class="text-muted">Groups ({{ program.groups|length }}):</small>
+                            <div class="mt-1">
+                                {% for group in program.groups %}
+                                <span class="badge bg-light text-dark me-1">
+                                    {{ group.name }} ({{ group.code }})
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="mt-2">
+                            <small class="text-muted">No groups created yet</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No programs created for this year.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>{{ years|length }}</h4>
+                <p class="mb-0">Academic Years</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.total_programs }}</h4>
+                <p class="mb-0">Programs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.total_groups }}</h4>
+                <p class="mb-0">Groups</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ stats.active_years }}</h4>
+                <p class="mb-0">Active Years</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Management Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Management Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if has_permission(current_user.id, 'org.create') %}
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('admin.create_year') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-calendar-plus me-2"></i>New Academic Year
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if has_permission(current_user.id, 'user.read') %}
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('admin.users') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if has_permission(current_user.id, 'report.read') %}
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('admin.reports') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-chart-bar me-2"></i>View Reports
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if has_permission(current_user.id, 'audit.read') %}
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-history me-2"></i>Audit Logs
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

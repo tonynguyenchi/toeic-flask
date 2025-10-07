@@ -14,13 +14,13 @@ class TOEICExam {
     initializeExam() {
         // Part ranges for TOEIC
         this.partRanges = {
-            1: { start: 1, end: 6, name: 'Part I' },
-            2: { start: 7, end: 31, name: 'Part II' },
-            3: { start: 32, end: 70, name: 'Part III' },
+            1: { start: 1, end: 10, name: 'Part I' },
+            2: { start: 11, end: 40, name: 'Part II' },
+            3: { start: 41, end: 70, name: 'Part III' },
             4: { start: 71, end: 100, name: 'Part IV' },
-            5: { start: 101, end: 130, name: 'Part V' },
-            6: { start: 131, end: 146, name: 'Part VI' },
-            7: { start: 147, end: 200, name: 'Part VII' }
+            5: { start: 101, end: 140, name: 'Part V' },
+            6: { start: 141, end: 152, name: 'Part VI' },
+            7: { start: 153, end: 200, name: 'Part VII' }
         };
 
         this.updateNavigator();
@@ -28,21 +28,35 @@ class TOEICExam {
     }
 
     bindEvents() {
-        // Part tab navigation
-        document.querySelectorAll('.part-tab').forEach(tab => {
+        // Part tab navigation (optional; template uses inline handlers)
+        document.querySelectorAll('[data-part]').forEach(tab => {
             tab.addEventListener('click', (e) => {
-                const part = parseInt(e.target.dataset.part);
-                this.switchToPart(part);
+                const partAttr = e.currentTarget.getAttribute('data-part');
+                const part = parseInt(partAttr, 10);
+                if (!Number.isNaN(part)) this.switchToPart(part);
             });
         });
 
-        // Answer selection
-        document.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const questionNumber = parseInt(e.target.dataset.question);
-                const answer = e.target.value;
-                this.saveAnswer(questionNumber, answer);
-            });
+        // Answer selection (content radios -> answer sheet) via event delegation
+        document.addEventListener('change', (e) => {
+            const target = e.target;
+            if (target && target.matches('input[type="radio"][name^="question_"]')) {
+                const questionNumber = parseInt(target.dataset.question);
+                const answer = target.value;
+                console.debug('[content->sheet] change', { questionNumber, answer });
+                this.handleSelection(questionNumber, answer);
+            }
+        });
+
+        // Answer sheet -> Content sync via event delegation
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.answer-btn');
+            if (!btn) return;
+            e.preventDefault();
+            const questionNumber = parseInt(btn.dataset.question);
+            const answer = btn.dataset.answer;
+            console.debug('[sheet->content] click', { questionNumber, answer });
+            this.handleSelection(questionNumber, answer);
         });
 
         // Question bubble navigation
@@ -54,35 +68,54 @@ class TOEICExam {
         });
 
         // Part navigation buttons
-        document.getElementById('prevPartBtn').addEventListener('click', () => {
-            if (this.currentPart > 1) {
-                this.switchToPart(this.currentPart - 1);
-            }
-        });
+        const prevPartBtn = document.getElementById('prevPartBtn');
+        if (prevPartBtn) {
+            prevPartBtn.addEventListener('click', () => {
+                if (this.currentPart > 1) {
+                    this.switchToPart(this.currentPart - 1);
+                }
+            });
+        }
 
-        document.getElementById('nextPartBtn').addEventListener('click', () => {
-            if (this.currentPart < 7) {
-                this.switchToPart(this.currentPart + 1);
-            }
-        });
+        const nextPartBtn = document.getElementById('nextPartBtn');
+        if (nextPartBtn) {
+            nextPartBtn.addEventListener('click', () => {
+                if (this.currentPart < 7) {
+                    this.switchToPart(this.currentPart + 1);
+                }
+            });
+        }
 
         // Navigator arrows
-        document.getElementById('navPrevBtn').addEventListener('click', () => {
-            if (this.currentPart > 1) {
-                this.switchToPart(this.currentPart - 1);
-            }
-        });
+        const navPrevBtn = document.getElementById('navPrevBtn');
+        if (navPrevBtn) {
+            navPrevBtn.addEventListener('click', () => {
+                if (this.currentPart > 1) {
+                    this.switchToPart(this.currentPart - 1);
+                }
+            });
+        }
 
-        document.getElementById('navNextBtn').addEventListener('click', () => {
-            if (this.currentPart < 7) {
-                this.switchToPart(this.currentPart + 1);
-            }
-        });
+        const navNextBtn = document.getElementById('navNextBtn');
+        if (navNextBtn) {
+            navNextBtn.addEventListener('click', () => {
+                if (this.currentPart < 7) {
+                    this.switchToPart(this.currentPart + 1);
+                }
+            });
+        }
 
         // Submit exam
-        document.getElementById('submitExamBtn').addEventListener('click', () => {
-            this.showSubmitConfirmation();
-        });
+        const submitBtn = document.getElementById('submitExamBtn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', () => {
+                if (typeof submitExam === 'function') {
+                    submitExam();
+                } else {
+                    this.showSubmitConfirmation();
+                }
+            });
+        }
 
         // Auto-save on page unload
         window.addEventListener('beforeunload', () => {
@@ -108,15 +141,21 @@ class TOEICExam {
 
     switchToPart(partNumber) {
         // Hide current part
-        document.getElementById(`part-${this.currentPart}`).style.display = 'none';
-        document.getElementById(`bubbles-part-${this.currentPart}`).style.display = 'none';
-        document.getElementById(`tab-part-${this.currentPart}`).classList.remove('active');
+        const prevPartEl = document.getElementById(`part-${this.currentPart}`);
+        if (prevPartEl) prevPartEl.style.display = 'none';
+        const prevBubbles = document.getElementById(`bubbles-part-${this.currentPart}`);
+        if (prevBubbles) prevBubbles.style.display = 'none';
+        const prevTab = document.getElementById(`tab-part-${this.currentPart}`);
+        if (prevTab) prevTab.classList.remove('active');
 
         // Show new part
         this.currentPart = partNumber;
-        document.getElementById(`part-${this.currentPart}`).style.display = 'block';
-        document.getElementById(`bubbles-part-${this.currentPart}`).style.display = 'block';
-        document.getElementById(`tab-part-${this.currentPart}`).classList.add('active');
+        const curPartEl = document.getElementById(`part-${this.currentPart}`);
+        if (curPartEl) curPartEl.style.display = 'block';
+        const curBubbles = document.getElementById(`bubbles-part-${this.currentPart}`);
+        if (curBubbles) curBubbles.style.display = 'block';
+        const curTab = document.getElementById(`tab-part-${this.currentPart}`);
+        if (curTab) curTab.classList.add('active');
 
         // Update navigator
         this.updateNavigator();
@@ -146,6 +185,30 @@ class TOEICExam {
         this.saveTimeout = setTimeout(() => {
             this.saveToServer(questionNumber, answer);
         }, 300);
+    }
+
+    // Centralized handler to keep UI in sync no matter the source of selection
+    handleSelection(questionNumber, answer) {
+        // 1) Update content radio
+        const radio = document.querySelector(`input[name="question_${questionNumber}"][value="${answer}"]`);
+        if (radio && !radio.checked) {
+            radio.checked = true;
+        }
+
+        // 2) Update answer sheet buttons
+        const buttons = document.querySelectorAll(`.answer-btn[data-question="${questionNumber}"]`);
+        buttons.forEach(btn => {
+            if (btn.dataset.answer === answer) {
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-primary');
+            } else {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-primary');
+            }
+        });
+
+        // 3) Persist
+        this.saveAnswer(questionNumber, answer);
     }
 
     async saveToServer(questionNumber, answer) {
@@ -202,19 +265,21 @@ class TOEICExam {
 
     updateNavigator() {
         const navigatorTitle = document.getElementById('navigatorTitle');
-        navigatorTitle.textContent = this.partRanges[this.currentPart].name;
+        if (navigatorTitle) {
+            navigatorTitle.textContent = this.partRanges[this.currentPart].name;
+        }
     }
 
     updateNavigationButtons() {
         const prevBtn = document.getElementById('prevPartBtn');
         const nextBtn = document.getElementById('nextPartBtn');
-        const navPrevBtn = document.getElementById('navPrevBtn');
-        const navNextBtn = document.getElementById('navNextBtn');
+        const navPrevBtn2 = document.getElementById('navPrevBtn');
+        const navNextBtn2 = document.getElementById('navNextBtn');
 
-        prevBtn.disabled = this.currentPart === 1;
-        nextBtn.disabled = this.currentPart === 7;
-        navPrevBtn.disabled = this.currentPart === 1;
-        navNextBtn.disabled = this.currentPart === 7;
+        if (prevBtn) prevBtn.disabled = this.currentPart === 1;
+        if (nextBtn) nextBtn.disabled = this.currentPart === 7;
+        if (navPrevBtn2) navPrevBtn2.disabled = this.currentPart === 1;
+        if (navNextBtn2) navNextBtn2.disabled = this.currentPart === 7;
     }
 
     showSubmitConfirmation() {

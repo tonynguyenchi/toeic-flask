@@ -32,6 +32,11 @@
                 <a class="nav-link" href="{{ url_for('results') }}">
                     <i class="fas fa-chart-bar me-1"></i>Results
                 </a>
+                {% if current_user and has_permission(current_user.id, 'user.read') %}
+                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                    <i class="fas fa-cogs me-1"></i>Admin Panel
+                </a>
+                {% endif %}
                 <div class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-user me-1"></i>{{ current_user.username }}

@@ -2,6 +2,7 @@
 
 .exam-container {
     min-height: 100vh;
+    padding-bottom: 120px; /* Space for fixed submit button */
 }
 
 .exam-header {
@@ -220,6 +221,30 @@
     to { height: 25px; }
 }
 
+/* Image Display Styles */
+.question-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    border: 2px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.question-image img:hover {
+    transform: scale(1.02);
+}
+
+/* Ensure image area has presence and centers the image */
+.question-block .question-image {
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .exam-header .row > div {
@@ -300,4 +325,21 @@
         border: 1px solid #000;
         margin-bottom: 1rem;
     }
+}
+
+/* Submit Button Styles */
+#submitExamBtn {
+    min-width: 200px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+#submitExamBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+#submitExamBtn:disabled {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
